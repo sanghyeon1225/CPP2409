@@ -1,7 +1,7 @@
 #include "user.h"
 
 // Warrior 클래스의 멤버 함수 정의
-void Warrior::IncreaseHP(int inc_hp) {
+void Warrior::IncreaseHP(int inc_hp) {  
     hp += inc_hp;
 }
 

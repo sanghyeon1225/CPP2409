@@ -12,10 +12,10 @@ bool checkXY(int user_x, int mapX, int user_y, int mapY);
 void displayMap(vector<vector<int>>& map, int user_x, int user_y);
 bool checkGoal(vector<vector<int>>& map, int user_x, int user_y);
 void checkState(vector<vector<int>>& map, int user_x, int user_y, User* user);
-bool userMove(vector<vector<int>>& map, string user_input, int& user_x, int& user_y, User &user);
-bool CheckUser(User &user);
+bool userMove(vector<vector<int>>& map, string user_input, int& user_x, int& user_y, User* user);
+bool CheckUser(User* user);
 
-User *user;
+string select;
 
 // 메인  함수
 int main() {
@@ -31,9 +31,10 @@ int main() {
 	int user_x = 0; // 가로 번호
 	int user_y = 0; // 세로 번호
 	
-	string select;
 	cout << "플레이를 원하는 직업을 입력하세요 (Magician = M, Warrior = W)" << endl;
 	cin >> select;
+	
+	User *user;
 
 	if (select == "M") {
 		user = new Magician();
@@ -50,7 +51,7 @@ int main() {
 		
 		// 사용자의 입력을 저장할 변수
 		string user_input = "";
-		if (!CheckUser(*user)) {
+		if (!CheckUser(user)) {
 			cout << "HP가 0 이하가 되었습니다. 실패했습니다." << endl;
 			cout << "게임을 종료합니다." << endl;
 			break;
@@ -70,7 +71,7 @@ int main() {
 		}
 
 		// 사용자 입력에 따라 유저 좌표 이동
-		bool input_check = userMove(map, user_input, user_x, user_y, *user);
+		bool input_check = userMove(map, user_input, user_x, user_y, user);
 		
 		// 사용자 입력이 up down left right map이 아니라면 다시 입력 받기
 		if (input_check == false) {
@@ -98,7 +99,7 @@ void displayMap(vector<vector<int>>& map, int user_x, int user_y) {
     for (int i = 0; i < mapY; i++) {
         for (int j = 0; j < mapX; j++) {
             if (i == user_y && j == user_x) {
-                cout << " User |"; // 직업에 따라 Warrior 또는 Magician 출력
+                cout << "   " << select << "  |"; // 직업에 따라 Warrior 또는 Magician 출력
             }
             else {
                 int posState = map[i][j];
@@ -149,7 +150,7 @@ bool checkGoal(vector<vector<int>>& map, int user_x, int user_y) {
 void checkState(vector<vector<int>>& map, int user_x, int user_y, User* user) {
 	if(map[user_y][user_x] == 1) {
 		cout << "아이템이 있습니다." << endl;
-		user->IncrementItemCount();
+		user->IncreaseItem();
 	}
 	else if(map[user_y][user_x] == 2) {
 		cout << "적이 있습니다. HP가 2 줄어듭니다." << endl;
@@ -162,18 +163,18 @@ void checkState(vector<vector<int>>& map, int user_x, int user_y, User* user) {
 }
 
 // 유저의 입력에 따른 위치를 이동시키는 함수
-bool userMove(vector<vector<int>>& map, string user_input, int& user_x, int& user_y, User &user) {
+bool userMove(vector<vector<int>>& map, string user_input, int& user_x, int& user_y, User* user) {
 	if(user_input == "up") {
 		// 입력받은 값에 따라 좌표를 옮기고, hp 1 감소
 		user_y -= 1;
-		user.DecreaseHP(1);
+		user->DecreaseHP(1);
 		bool inMap = checkXY(user_x, mapX, user_y, mapY);
 		
 		// 유효한 이동이 아니라면 원래 좌표로 복귀
 		if (inMap == false) {
 			cout << "맵을 벗어났습니다. 다시 돌아갑니다." << endl;
 			user_y += 1;
-			user.IncreaseHP(1);
+			user->IncreaseHP(1);
 		}
 		// 유효한 이동이라면 이동 성공했다는 문구 출력과 현재 map 상태 출력
 		else {
@@ -183,13 +184,13 @@ bool userMove(vector<vector<int>>& map, string user_input, int& user_x, int& use
 	}
 	else if(user_input == "down") {
 		user_y += 1;
-		user.DecreaseHP(1);
+		user->DecreaseHP(1);
 		bool inMap = checkXY(user_x, mapX, user_y, mapY);
 
 		if (inMap == false) {
 			cout << "맵을 벗어났습니다. 다시 돌아갑니다." << endl;
 			user_y -= 1;
-			user.IncreaseHP(1);
+			user->IncreaseHP(1);
 		}
 		else {
 			cout << "위로 한 칸 내려갑니다." << endl;
@@ -198,13 +199,13 @@ bool userMove(vector<vector<int>>& map, string user_input, int& user_x, int& use
 	}
 	else if(user_input == "left") {
 		user_x -= 1;
-		user.DecreaseHP(1);
+		user->DecreaseHP(1);
 		bool inMap = checkXY(user_x, mapX, user_y, mapY);
 
 		if (inMap == false) {
 			cout << "맵을 벗어났습니다. 다시 돌아갑니다." << endl;
 			user_x += 1;
-			user.IncreaseHP(1);
+			user->IncreaseHP(1);
 		}
 		else {
 			cout << "왼쪽으로 이동합니다." << endl;
@@ -213,12 +214,12 @@ bool userMove(vector<vector<int>>& map, string user_input, int& user_x, int& use
 	}
 	else if(user_input == "right") {
 		user_x += 1;
-		user.DecreaseHP(1);
+		user->DecreaseHP(1);
 		bool inMap = checkXY(user_x, mapX, user_y, mapY);
 		if (inMap == false) {
 			cout << "맵을 벗어났습니다. 다시 돌아갑니다." << endl;
 			user_x -= 1;
-			user.IncreaseHP(1);
+			user->IncreaseHP(1);
 		}
 		else {
 			cout << "오른쪽으로 이동합니다." << endl;
@@ -230,10 +231,10 @@ bool userMove(vector<vector<int>>& map, string user_input, int& user_x, int& use
 		displayMap(map, user_x, user_y);
 	}
 	else if (user_input == "info") {
-		cout << user << endl;
+		cout << *user << endl;
 	}
 	else if (user_input == "attack") {
-		user.DoAttack();
+		user->DoAttack();
 	}
 	else {
 		cout << "잘못된 입력입니다." << endl;
@@ -242,8 +243,8 @@ bool userMove(vector<vector<int>>& map, string user_input, int& user_x, int& use
 	return true;
 }
 
-bool CheckUser(User &user) {
-    if (user.GetHP() <= 0)
+bool CheckUser(User* user) {
+    if (user->GetHP() <= 0)
         return false;
     else
         return true;
